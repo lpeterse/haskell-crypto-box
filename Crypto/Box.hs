@@ -3,9 +3,6 @@ module Crypto.Box (
   CryptoBox (..)
   ) where
 
-import Control.Monad.IO.Class
-import Control.Monad.Catch
-
 import Data.ByteString
 
 class CryptoBox b where
@@ -19,14 +16,14 @@ class CryptoBox b where
   --   like @SecretKey xxxxxxxxxxxxx@. The risk of unintentionally
   --   exposing it through log files or stack traces is unacceptable.
   type (SecretKey b)
-  -- | A `Factory` protects your `SecretKey` from being misused by application code.
+  -- | A `BoxFactory` protects your `SecretKey` from being misused by application code.
   --
-  -- - Application code that has a `Factory` in scope should not be able to
+  -- - Application code that has a `BoxFactory` in scope should not be able to
   --   extract the secret key from it, but it can still use it for encryption
   --   and decryption by producing a `Box` first.
   -- - `publicKey` may be used to retrieve the `PublicKey` that belongs to
   --   the encapsulated `SecretKey`.
-  type (Factory b)
+  type (BoxFactory b)
   -- | A `Box` contains the state necessary for repeated encryption and decryption
   --   of messages between you and someone else.
   --
@@ -34,20 +31,20 @@ class CryptoBox b where
   --   operation. The `Box` should be reused if possible.
   type (Box b)
 
-  -- | This creates a `Factory` from a given `SecretKey`.
+  -- | This creates a `BoxFactory` from a given `SecretKey`.
   --
   -- - Try to do this once near the beginning of your program and drop
   --   the `SecretKey` afterwards.
-  createFactory       :: SecretKey b -> IO (Factory b)
+  newBoxFactory       :: SecretKey b -> IO (BoxFactory b)
 
-  -- | This creates a `Factory` with a random `SecretKey`.
+  -- | This creates a `BoxFactory` with a random `SecretKey`.
   --
   -- - The `SecretKey` is lost when the program ends as it cannot be
   --   extracted.
-  createRandomFactory :: IO (Factory b)
+  newRandomBoxFactory :: IO (BoxFactory b)
 
   -- | Get a `Box` for private communication with someone else identified by `PublicKey`.
-  box       :: Factory b -> PublicKey b -> Box b
+  newBox              :: BoxFactory b -> PublicKey b -> IO (Box b)
 
   -- | Encrypt a message.
   --
@@ -58,8 +55,5 @@ class CryptoBox b where
   -- - `Nothing` is returned if the message has been tampered with.
   decrypt   :: Box b -> ByteString -> Maybe ByteString
 
-  -- | Extract __your own__ `PublicKey` from the `Factory`.
-  publicKey :: Factory b -> PublicKey b
-
-
-
+  -- | Extract __your own__ `PublicKey` from the `BoxFactory`.
+  publicKey :: BoxFactory b -> PublicKey b

@@ -3,7 +3,7 @@ module Crypto.Box.None (
     None
   , PublicKey (..)
   , SecretKey
-  , Factory
+  , BoxFactory
   , Box
   ) where
 
@@ -19,27 +19,27 @@ data SecretKey
    = SecretKey String
    deriving (Eq, Ord, Show)
 
-data Factory
-   = Factory SecretKey
+data BoxFactory
+   = BoxFactory SecretKey
    deriving (Eq, Ord, Show)
 
 data Box
-   = Box Factory PublicKey
+   = Box BoxFactory PublicKey
    deriving (Eq, Ord, Show)
 
 instance CB.CryptoBox None where
   type PublicKey None = PublicKey
   type SecretKey None = SecretKey
-  type Factory   None = Factory
+  type BoxFactory   None = BoxFactory
   type Box       None = Box
 
-  createFactory       = return . Factory
-  createRandomFactory = return $ Factory (SecretKey "4; // chosen by fair dice roll.")
+  newBoxFactory       = return . BoxFactory
+  newRandomBoxFactory = return $ BoxFactory (SecretKey "4; // chosen by fair dice roll.")
 
-  box f k             = Box f k
+  newBox f k          = return (Box f k)
 
   encrypt b message   = return message
   decrypt b cipher    = Just cipher
 
-  publicKey (Factory (SecretKey s))
+  publicKey (BoxFactory (SecretKey s))
                       = PublicKey (reverse s)
