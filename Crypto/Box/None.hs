@@ -7,6 +7,7 @@ module Crypto.Box.None (
   , Box
   ) where
 
+import Data.String
 import qualified Crypto.Box as CB
 
 data None
@@ -44,8 +45,8 @@ instance CB.HasBox None where
   publicKey (BoxFactory (SecretKey s))
                       = PublicKey (reverse s)
 
-  publicKeyToByteString (PublicKey s) = read s
+  publicKeyToByteString (PublicKey s) = fromString s
   publicKeyFromByteString = return . PublicKey . show
 
-  secretKeyToByteString (SecretKey s) = read s
+  secretKeyToByteString (SecretKey s) = fromString s
   secretKeyFromByteString = return . SecretKey . show
