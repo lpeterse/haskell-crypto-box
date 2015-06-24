@@ -27,11 +27,11 @@ data Box
    = Box BoxFactory PublicKey
    deriving (Eq, Ord, Show)
 
-instance CB.CryptoBox None where
-  type PublicKey None = PublicKey
-  type SecretKey None = SecretKey
-  type BoxFactory   None = BoxFactory
-  type Box       None = Box
+instance CB.HasBox None where
+  type PublicKey  None       = PublicKey
+  type SecretKey  None       = SecretKey
+  type BoxFactory None = BoxFactory
+  type Box        None = Box
 
   newBoxFactory       = return . BoxFactory
   newRandomBoxFactory = return $ BoxFactory (SecretKey "4; // chosen by fair dice roll.")

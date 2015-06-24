@@ -1,12 +1,46 @@
 {-# LANGUAGE TypeFamilies #-}
+-----------------------------------------------------------------------------
+-- |
+-- Module      :  Crypto.Box
+-- Copyright   :  (c) Lars Petersen 2015
+-- License     :  MIT
+--
+-- Maintainer  :  info@lars-petersen.net
+-- Stability   :  experimental
+-- Portability :  portable
+--
+-- > -- Choose an implementation from another library.
+-- > type Implementation = Saltine
+-- >
+-- > main :: IO ()
+-- > main = do
+-- >   -- Load the secret key once at the beginning of your program. Don't use it elsewhere!
+-- >   factory <- newBoxFactory =<< secretKeyFromByteString =<< B.readFile "secretkey"
+-- >   -- This is the only point in your program where you define which `HasBox` implemenation to use.
+-- >   app (factory :: BoxFactory Implementation)
+-- >
+-- > -- Your application does not know about a specific implementation and is therefore
+-- > -- limited to the methods defined by the HasBox interface. This makes it easy
+-- > -- to change the implementation if necessary. It also protect against certain programming errors.
+-- > 
+-- > app :: HasBox a => BoxFactory a -> IO ()
+-- > app factory = do
+-- >   print ("My own public key is " ++ show (publicKey factory))
+-- >   friendsPublicKey <- publicKeyFromByteString
+-- >     "\208\130\135\180l\DC2L?\202\145\204\199HD\239U\144L\CANU\151\158.\184x[\209\155\241HF%"
+-- >   box <- newBox factory friendsPublicKey
+-- >   cipherText <- encrypt box "Hello world!"
+-- >   print "Send this cipher text to your friend:"
+-- >   print cipherText
+-----------------------------------------------------------------------------
 module Crypto.Box (
-  CryptoBox (..)
+  HasBox (..)
   ) where
 
 import Data.ByteString
 import Control.Monad.Catch
 
-class CryptoBox b where
+class HasBox b where
   -- | A `PublicKey` may be shared with others. It's not a secret
   --   and does not need to be protected. It is usually derived from
   --   a `SecretKey`.
