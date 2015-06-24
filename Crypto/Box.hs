@@ -33,6 +33,7 @@
 -- > 
 -- > app :: HasBox crypto => BoxFactory crypto -> IO ()
 -- > app factory = do
+-- >   print ("Algorithm used is" ++ show (algorithm factory))
 -- >   print ("My own public key is " ++ show (publicKey factory))
 -- >   print ("Enter your friend's public key:")
 -- >   friendsPublicKey <- publicKeyFromByteString =<< B.getLine
@@ -100,8 +101,12 @@ class HasBox crypto where
   -- - Fails if the message has been tampered with.
   decrypt   :: MonadThrow m => Box crypto -> ByteString -> m ByteString
 
+  -- | A short description of the algorithm suite, i.e. @curve25519xsalsa20poly1305@.
+  algorithm      :: BoxFactory crypto -> ByteString
   -- | Extract __your own__ `PublicKey` from the `BoxFactory`.
-  publicKey :: BoxFactory crypto -> PublicKey crypto
+  publicKey      :: BoxFactory crypto -> PublicKey crypto
+  publicKeyBytes :: BoxFactory crypto -> Int
+  secretKeyBytes :: BoxFactory crypto -> Int
 
   publicKeyToByteString   :: PublicKey crypto -> ByteString
   publicKeyFromByteString :: MonadThrow m => ByteString -> m (PublicKey crypto)

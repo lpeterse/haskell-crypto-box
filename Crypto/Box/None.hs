@@ -1,4 +1,4 @@
-{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE OverloadedStrings, TypeFamilies #-}
 module Crypto.Box.None (
     None
   , PublicKey (..)
@@ -29,8 +29,8 @@ data Box
    deriving (Eq, Ord, Show)
 
 instance CB.HasBox None where
-  type PublicKey  None       = PublicKey
-  type SecretKey  None       = SecretKey
+  type PublicKey  None = PublicKey
+  type SecretKey  None = SecretKey
   type BoxFactory None = BoxFactory
   type Box        None = Box
 
@@ -42,8 +42,10 @@ instance CB.HasBox None where
   encrypt b message   = return message
   decrypt b cipher    = return cipher
 
-  publicKey (BoxFactory (SecretKey s))
-                      = PublicKey (reverse s)
+  algorithm _         = "None! DANGER! FIXME! DONTUSEINPRODUCTION!"
+  publicKey (BoxFactory (SecretKey s)) = PublicKey (reverse s)
+  publicKeyBytes _    = 0
+  secretKeyBytes _    = 0
 
   publicKeyToByteString (PublicKey s) = fromString s
   publicKeyFromByteString = return . PublicKey . show
