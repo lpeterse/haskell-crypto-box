@@ -43,3 +43,9 @@ instance CB.CryptoBox None where
 
   publicKey (BoxFactory (SecretKey s))
                       = PublicKey (reverse s)
+
+  publicKeyToByteString (PublicKey s) = read s
+  publicKeyFromByteString = return . PublicKey . show
+
+  secretKeyToByteString (SecretKey s) = read s
+  secretKeyFromByteString = return . SecretKey . show

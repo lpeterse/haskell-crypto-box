@@ -61,4 +61,7 @@ class CryptoBox b where
 
   publicKeyToByteString   :: PublicKey b -> ByteString
   publicKeyFromByteString :: MonadThrow m => ByteString -> m (PublicKey b)
+
+  -- | This is dangerous. Think twice what you're doing!
+  secretKeyToByteString   :: SecretKey b -> ByteString
   secretKeyFromByteString :: MonadThrow m => ByteString -> m (SecretKey b)
