@@ -13,18 +13,19 @@
 -- > module Main where
 -- >
 -- > import Crypto.Box
--- > import Crypto.Box.None as None
+-- > import Crypto.Box.Debug
 -- > import Data.ByteString as B
 -- >
--- > -- Choose an implementation of the `HasBox` functionality.
--- > type Crypto = None -- use `None` for debugging
+-- > -- Choose an implementation (Saltine or similar).
+-- > -- Attention: `DebugBoxFactory` does no encryption at all.
+-- > type Factory = DebugBoxFactory
 -- >
 -- > main :: IO ()
 -- > main = do
 -- >   -- Load the secret key once at the beginning of your program. Don't use it elsewhere!
 -- >   factory <- newBoxFactory =<< fromByteString =<< B.readFile "secretkey"
 -- >   -- This is the only point in your program where you define which implemenation to use.
--- >   app (factory :: None.BoxFactory)
+-- >   app (factory :: Factory)
 -- >
 -- > -- The remaining application code does not know about a specific implementation and is therefore
 -- > -- limited to the methods defined by the `IsBoxFactory` and `IsBox` interfaces. This makes it easy
@@ -74,14 +75,14 @@ class (IsBox (Box f), IsKey (PublicKey f), IsKey (SecretKey f)) => IsBoxFactory 
   --
   -- - Try to do this once near the beginning of your program and drop
   --   the `SecretKey` afterwards.
-  newBoxFactory       :: SecretKey f -> IO f
+  newBoxFactory       :: MonadIO m => SecretKey f -> m f
   -- | Create a new `BoxFactory` with a random `SecretKey`.
   --
   -- - The `SecretKey` is lost when the program ends as it cannot be
   --   extracted.
-  newRandomBoxFactory :: IO f
+  newRandomBoxFactory :: MonadIO m => m f
   -- | Create a new `Box` for private communication with someone else identified by `PublicKey`.
-  newBox              :: f -> PublicKey f-> IO (Box f)
+  newBox              :: MonadIO m => f -> PublicKey f -> m (Box f)
 
   -- | A short description of the algorithm suite, i.e. @curve25519xsalsa20poly1305@.
   algorithm           :: f -> ByteString
