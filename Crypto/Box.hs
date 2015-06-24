@@ -102,5 +102,5 @@ class IsBox b where
 
 class IsKey k where
   toByteString   :: k -> ByteString
-  fromByteString ::MonadThrow m => ByteString -> m k
+  fromByteString :: MonadThrow m => ByteString -> m k
   length         :: k -> Int
