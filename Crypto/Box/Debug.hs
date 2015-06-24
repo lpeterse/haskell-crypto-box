@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings, TypeFamilies #-}
-module Crypto.Box.Debug (
-    DebugBoxFactory (..)
+module Crypto.Box.Debug 
+  {-# WARNING "This is a dummy implementation and does no encryption at all. Don't use it in production or with confidential data!" #-}
+  ( DebugBoxFactory (..)
   , DebugBox        (..)
   , DebugPublicKey  (..)
   , DebugSecretKey  (..)
