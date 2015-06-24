@@ -28,27 +28,30 @@ data Box
    = Box BoxFactory PublicKey
    deriving (Eq, Ord, Show)
 
-instance CB.HasBox None where
-  type PublicKey  None = PublicKey
-  type SecretKey  None = SecretKey
-  type BoxFactory None = BoxFactory
-  type Box        None = Box
+instance CB.IsBoxFactory BoxFactory where
+  type PublicKey  BoxFactory = PublicKey
+  type SecretKey  BoxFactory = SecretKey
+  type Box        BoxFactory = Box
 
   newBoxFactory       = return . BoxFactory
   newRandomBoxFactory = return $ BoxFactory (SecretKey "4; // chosen by fair dice roll.")
 
   newBox f k          = return (Box f k)
 
+  algorithm _         = "None! DANGER! FIXME! DONTUSEINPRODUCTION!"
+  publicKey (BoxFactory (SecretKey s)) = PublicKey (reverse s)
+
+instance CB.IsBox Box where
+
   encrypt b message   = return message
   decrypt b cipher    = return cipher
 
-  algorithm _         = "None! DANGER! FIXME! DONTUSEINPRODUCTION!"
-  publicKey (BoxFactory (SecretKey s)) = PublicKey (reverse s)
-  publicKeyBytes _    = 0
-  secretKeyBytes _    = 0
+instance CB.IsKey PublicKey where
+  toByteString (PublicKey s) = fromString s
+  fromByteString = return . PublicKey . show
+  length _ = 0
 
-  publicKeyToByteString (PublicKey s) = fromString s
-  publicKeyFromByteString = return . PublicKey . show
-
-  secretKeyToByteString (SecretKey s) = fromString s
-  secretKeyFromByteString = return . SecretKey . show
+instance CB.IsKey SecretKey where
+  toByteString (SecretKey s) = fromString s
+  fromByteString = return . SecretKey . show
+  length _ = 0
