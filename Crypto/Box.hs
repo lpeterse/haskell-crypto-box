@@ -4,6 +4,7 @@ module Crypto.Box (
   ) where
 
 import Data.ByteString
+import Control.Monad.Catch
 
 class CryptoBox b where
   -- | A `PublicKey` may be shared with others. It's not a secret
@@ -31,19 +32,19 @@ class CryptoBox b where
   --   operation. The `Box` should be reused if possible.
   type (Box b)
 
-  -- | This creates a `BoxFactory` from a given `SecretKey`.
+  -- | Create a new `BoxFactory` from a given `SecretKey`.
   --
   -- - Try to do this once near the beginning of your program and drop
   --   the `SecretKey` afterwards.
   newBoxFactory       :: SecretKey b -> IO (BoxFactory b)
 
-  -- | This creates a `BoxFactory` with a random `SecretKey`.
+  -- | Create a new `BoxFactory` with a random `SecretKey`.
   --
   -- - The `SecretKey` is lost when the program ends as it cannot be
   --   extracted.
   newRandomBoxFactory :: IO (BoxFactory b)
 
-  -- | Get a `Box` for private communication with someone else identified by `PublicKey`.
+  -- | Create a new `Box` for private communication with someone else identified by `PublicKey`.
   newBox              :: BoxFactory b -> PublicKey b -> IO (Box b)
 
   -- | Encrypt a message.
@@ -52,8 +53,12 @@ class CryptoBox b where
   encrypt   :: Box b -> ByteString -> IO ByteString
   -- | Decrypt and authenticate a message.
   --
-  -- - `Nothing` is returned if the message has been tampered with.
-  decrypt   :: Box b -> ByteString -> Maybe ByteString
+  -- - Fails if the message has been tampered with.
+  decrypt   :: MonadThrow m => Box b -> ByteString -> m ByteString
 
   -- | Extract __your own__ `PublicKey` from the `BoxFactory`.
   publicKey :: BoxFactory b -> PublicKey b
+
+  publicKeyToByteString   :: PublicKey b -> ByteString
+  publicKeyFromByteString :: MonadThrow m => ByteString -> m (PublicKey b)
+  secretKeyFromByteString :: MonadThrow m => ByteString -> m (SecretKey b)

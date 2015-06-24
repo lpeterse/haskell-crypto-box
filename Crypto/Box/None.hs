@@ -39,7 +39,7 @@ instance CB.CryptoBox None where
   newBox f k          = return (Box f k)
 
   encrypt b message   = return message
-  decrypt b cipher    = Just cipher
+  decrypt b cipher    = return cipher
 
   publicKey (BoxFactory (SecretKey s))
                       = PublicKey (reverse s)
